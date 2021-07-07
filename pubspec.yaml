@@ -1,7 +1,8 @@
 name: flutter_analytics
-description: A Flutter Analytics Library
+description: Flutter Analytics Library
 version: 0.0.1
 author: RealCradle
+homepage:
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -10,9 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   firebase_analytics: 8.1.0
-    #  facebook_analytics_plugin: ^0.0.1+8
   facebook_app_events: 0.12.0
 
 dev_dependencies:
