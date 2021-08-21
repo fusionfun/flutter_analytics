@@ -2,11 +2,13 @@ library analytics;
 
 import 'dart:async';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/widgets.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
+// import 'package:facebook_app_events/facebook_app_events.dart';
 
 part 'analytics.dart';
 

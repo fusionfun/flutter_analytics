@@ -3,7 +3,7 @@ part of "flutter_analytics.dart";
 class Analytics {
   static FirebaseAnalytics analytics = FirebaseAnalytics();
 
-  static FacebookAppEvents facebook = FacebookAppEvents();
+  // static FacebookAppEvents facebook = FacebookAppEvents();
   static List<EventTransmitter> transmitters = [];
 
   static NavigatorObserver getLogScreenNavigatorObserver() {
@@ -54,7 +54,7 @@ class Analytics {
       print("[facebook] logEvent: $name $parameters value:$valueToSum");
     }
 
-    facebook.logEvent(name: name, parameters: _filterOutNulls(parameters), valueToSum: valueToSum);
+    // facebook.logEvent(name: name, parameters: _filterOutNulls(parameters), valueToSum: valueToSum);
   }
 
   static setUserProperty(String name, String value) {
@@ -76,19 +76,45 @@ class Analytics {
   }
 
   static logEvent(String eventName, Map<String, dynamic> parameters, {AnalyticsCapabilities capabilities = AnalyticsCapabilities.fullCapabilities}) {
-    if (capabilities.hasCapability(AnalyticsCapabilities.firebase)) {
-      logFirebaseEvent(
-        name: eventName,
-        parameters: parameters,
-      );
-    }
-    if (capabilities.hasCapability(AnalyticsCapabilities.facebook)) {
-      logFacebookEvent(
-        name: eventName,
-        parameters: parameters,
-      );
+    if (kReleaseMode) {
+      if (capabilities.hasCapability(AnalyticsCapabilities.firebase)) {
+        logFirebaseEvent(
+          name: eventName,
+          parameters: parameters,
+        );
+      }
+      if (capabilities.hasCapability(AnalyticsCapabilities.facebook)) {
+        logFacebookEvent(
+          name: eventName,
+          parameters: parameters,
+        );
+      }
+    } else {
+      print("logEvent: $eventName $parameters");
     }
     transmit(eventName, parameters);
+  }
+
+  static logEventEx(String eventName,
+      {String? itemCategory,
+      String? itemName,
+      double? value,
+      Map<String, dynamic> parameters = const {},
+      AnalyticsCapabilities capabilities = AnalyticsCapabilities.fullCapabilities}) {
+    Map<String, dynamic> map = Map<String, dynamic>.from(parameters);
+    if (itemCategory != null) {
+      map["item_category"] = itemCategory;
+    }
+
+    if (itemName != null) {
+      map["item_name"] = itemName;
+    }
+
+    if (value != null) {
+      map["value"] = value;
+    }
+
+    logEvent(eventName, map, capabilities: capabilities);
   }
 
   static logEventWithCategoryAndName(String eventName, String itemCategory, String itemName) {
@@ -161,5 +187,34 @@ class Analytics {
     }
 
     // facebook.logPurchase(amount: amount, currency: currency, parameters: parameters);
+  }
+
+  static logAdImpression(String name, String adType, {String scene = "", String adName = "", Map<String, dynamic> parameters = const {}}) {
+    logEventEx(name, itemCategory: scene, itemName: adName);
+    if (kReleaseMode) {
+      Analytics.logFbAdImpression(adType);
+      FirebaseCrashlytics.instance.log("adImp: name($name) scene($scene) adName($adName) adType($adType)");
+    } else {
+      print("[facebook] logEvent logFbAdImpression: $adType");
+    }
+  }
+
+  static logAdClick(String name, String adType, {String scene = "", String adName = ""}) {
+    logEventEx(name, itemCategory: scene, itemName: adName);
+    if (kReleaseMode) {
+      Analytics.logFbAdClick(adType);
+    } else {
+      print("[facebook] logEvent logAdClick: $adType");
+    }
+  }
+
+  static Map<String, dynamic> filterOutNulls(Map<String, dynamic> parameters) {
+    final Map<String, dynamic> filtered = <String, dynamic>{};
+    parameters.forEach((String key, dynamic value) {
+      if (value != null) {
+        filtered[key] = value;
+      }
+    });
+    return filtered;
   }
 }
